@@ -354,6 +354,59 @@ public class SmartBankingApp {
 
                     } while (!valid);
 
+                 case DROP_ACCOUNT:
+                    
+                    do {
+                        valid = true;
+
+                        System.out.print("Enter Account No.: ");
+                        accountID = SCANNER.nextLine().strip();
+
+                        if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
+                            
+                            System.out.print("\n\tDo you want to try again (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            screen = DASHBOARD;
+                            break;
+                        }
+
+                        int idIndex = findIndex(accountID, accounts);
+                        accountBalance = Double.valueOf(accounts[idIndex][2]);
+                        String accountName = accounts[idIndex][1];
+                        System.out.printf("\n\tAccount Name: %s\n",accountName);
+                        System.out.printf("\tCurrent Account Balance: Rs. %,.2f\n",accountBalance);
+
+                        System.out.print("\n\tAre you sure to delete account (Y/n)?");
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                            System.out.print("\n\tDo you want to delete another account (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            else {
+                                screen = DASHBOARD;
+                                break;
+                            }
+                        }
+
+                        newAccount = new String[accounts.length-1][3]; 
+                    
+
+                        for (int i = 0; i < idIndex; i++) {
+                            newAccount[i] = accounts[i];
+                        }
+                        for (int i = idIndex; i < accounts.length; i++) {
+                            newAccount[i] = accounts[i+1];
+                        }
+
+                        accounts = newAccount;
+
+                        System.out.println();
+                        System.out.printf(SUCCESS_MSG,String.format("SDB-%05d: %s has been deleted successfully.",accountID,accountName));
+                        System.out.print("\tDo you want to delete another account (Y/n)?");
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                        screen = DASHBOARD;
+                        break;
+
+                    } while (!valid);
+
             }
             
         } while (true);
