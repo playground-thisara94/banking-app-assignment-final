@@ -26,7 +26,6 @@ public class SmartBankingApp {
 
         String screen = DASHBOARD;
 
-        outerloop:
         do {
             final String APP_TITLE = String.format("%s%s%s", COLOR_BLUE_BOLD,screen,RESET);
 
@@ -130,24 +129,8 @@ public class SmartBankingApp {
                         System.out.print("Enter Account No.: ");
                         accountID = SCANNER.nextLine().strip();
 
-                        if(accountID.isEmpty()) {
-                            System.out.printf(ERROR_MSG,"Account Number can't be empty");
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            screen = DASHBOARD;
-                            break;
-                        }
-
-                        if(!validFormat(accountID)) {
-                            System.out.printf(ERROR_MSG,"Invalid Format");
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            screen = DASHBOARD;
-                            break;
-                        }
-
-                        if(!foundID(accountID, accounts)) {
-                            System.out.printf(ERROR_MSG,"Not Found");
+                        if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
+                            
                             System.out.print("\n\tDo you want to try again (Y/n)?");
                             if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
                             screen = DASHBOARD;
@@ -198,24 +181,8 @@ public class SmartBankingApp {
                         System.out.print("Enter Account No.: ");
                         accountID = SCANNER.nextLine().strip();
 
-                        if(accountID.isEmpty()) {
-                            System.out.printf(ERROR_MSG,"Account Number can't be empty");
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            screen = DASHBOARD;
-                            break;
-                        }
-
-                        if(!validFormat(accountID)) {
-                            System.out.printf(ERROR_MSG,"Invalid Format");
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            screen = DASHBOARD;
-                            break;
-                        }
-
-                        if(!foundID(accountID, accounts)) {
-                            System.out.printf(ERROR_MSG,"Not Found");
+                        if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
+                            
                             System.out.print("\n\tDo you want to try again (Y/n)?");
                             if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
                             screen = DASHBOARD;
@@ -264,6 +231,99 @@ public class SmartBankingApp {
 
                     } while (!valid);
 
+                case TRANSFER_MONEY:
+                    double transfer;
+                    double fromBalance;
+                    double toBalance;
+                    String fromAccount;
+                    String toAccount;
+                    
+                    loopTransfer:
+                    do {
+                        valid = true;
+
+                        boolean repeat;
+                        do {
+                            repeat = false;
+                            System.out.print("Enter From Account No.: ");
+                            fromAccount = SCANNER.nextLine().strip();
+
+                            if(!notEmpty(fromAccount) || !validFormat(fromAccount) || !foundID(fromAccount, accounts)) {
+                                
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopTransfer;
+                            }
+
+                        } while (repeat);
+
+                        do {
+                            repeat = false;
+                            System.out.print("Enter To Account No.: ");
+                            toAccount = SCANNER.nextLine().strip();
+
+                            if(!notEmpty(toAccount) || !validFormat(toAccount) || !foundID(toAccount, accounts)) {
+                                
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopTransfer;
+                            }
+
+                        } while (repeat);
+
+                        int fromIdIndex = findIndex(fromAccount, accounts);
+                        fromBalance = Double.valueOf(accounts[fromIdIndex][2]);
+
+                        int toIdIndex = findIndex(toAccount, accounts);
+                        toBalance = Double.valueOf(accounts[toIdIndex][2]);
+
+                        System.out.printf("\n\tFrom Account Name: %s\n",accounts[fromIdIndex][1]);
+                        System.out.printf("\tFrom Account Balance: Rs. %,.2f\n",fromBalance);
+                        System.out.printf("\n\tTo Account Name: %s\n",accounts[toIdIndex][1]);
+                        System.out.printf("\tTo Account Balance: Rs. %,.2f\n",toBalance);
+
+                        do {
+                            repeat = false;
+                            System.out.print("\nEnter Transfer Amount: ");
+                            transfer = SCANNER.nextDouble();
+                            SCANNER.nextLine();
+
+                            if(transfer < 100.00) {
+                                System.out.printf(ERROR_MSG,"Minimum Transfer amount is Rs. 100.00");
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopTransfer;
+                            }
+
+                            if((toBalance - (transfer*1.02)) < 500.00) {
+                                System.out.printf(ERROR_MSG,"Insufficient Account Balance");
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopTransfer;
+                            }
+
+                        } while (repeat);
+
+                        fromBalance -= (transfer * 1.02);
+                        toBalance += transfer;
+
+                        System.out.printf("\n\tNew From Account Balance: Rs. %,.2f\n",fromBalance);
+                        System.out.printf("\n\tNew To Account Balance: Rs. %,.2f\n",toBalance);
+
+                        accounts[fromIdIndex][2] = fromBalance+"";
+                        accounts[toIdIndex][2] = toBalance+"";
+
+                        System.out.print("\n\tDo you want to continue Transfer Money (Y/n)?");
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                        screen = DASHBOARD;
+                        break;
+
+                    } while (!valid);
+
             }
             
         } while (true);
@@ -284,6 +344,7 @@ public class SmartBankingApp {
         for (int i = 0; i < accounts.length; i++) {
             if (accountID.equals(accounts[i][0])) return true;
         }
+        System.out.printf(ERROR_MSG,"Not Found");
         return false;
     }
 
@@ -292,9 +353,26 @@ public class SmartBankingApp {
         for (int i = 0; i < accountId.length(); i++) {
             String digits = accountId.substring(5, 10);
             
-            if(accountId.length() != 9) return false;
-            else if(!accountId.substring(0, 4).equals("SDB-")) return false;
-            else if (!Character.isDigit(digits.charAt(i))) return false;
+            if(accountId.length() != 9) {
+                System.out.printf(ERROR_MSG,"Invalid Format");
+                return false;
+            } else if(!accountId.substring(0, 4).equals("SDB-")) {
+                System.out.printf(ERROR_MSG,"Invalid Format");
+                return false;
+            }
+            else if (!Character.isDigit(digits.charAt(i))) {
+                System.out.printf(ERROR_MSG,"Invalid Format");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean notEmpty(String accountId) {
+        
+        if(accountId.isEmpty()) {
+            System.out.printf(ERROR_MSG,"Account Number can't be empty");
+            return false;
         }
         return true;
     }
