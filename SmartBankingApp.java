@@ -188,7 +188,81 @@ public class SmartBankingApp {
 
                     } while (!valid);
 
-                
+                case WITHDRAW_MONEY:
+                    double withdraw;
+                    
+                    loopWithdraw:
+                    do {
+                        valid = true;
+
+                        System.out.print("Enter Account No.: ");
+                        accountID = SCANNER.nextLine().strip();
+
+                        if(accountID.isEmpty()) {
+                            System.out.printf(ERROR_MSG,"Account Number can't be empty");
+                            System.out.print("\n\tDo you want to try again (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            screen = DASHBOARD;
+                            break;
+                        }
+
+                        if(!validFormat(accountID)) {
+                            System.out.printf(ERROR_MSG,"Invalid Format");
+                            System.out.print("\n\tDo you want to try again (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            screen = DASHBOARD;
+                            break;
+                        }
+
+                        if(!foundID(accountID, accounts)) {
+                            System.out.printf(ERROR_MSG,"Not Found");
+                            System.out.print("\n\tDo you want to try again (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            screen = DASHBOARD;
+                            break;
+                        }
+
+                        int idIndex = findIndex(accountID, accounts);
+                        accountBalance = Double.valueOf(accounts[idIndex][2]);
+                        System.out.printf("\n\tCurrent Balance: Rs. %,.2f\n",accountBalance);
+
+                        boolean repeat;
+                        do {
+                            repeat = false;
+                            System.out.print("\nWithdraw Amount: ");
+                            withdraw = SCANNER.nextDouble();
+                            SCANNER.nextLine();
+
+                            if(withdraw < 100.00) {
+                                System.out.printf(ERROR_MSG,"Minimum Withdraw amount is Rs. 100.00");
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopWithdraw;
+                            }
+
+                            if((accountBalance - withdraw) < 500.00) {
+                                System.out.printf(ERROR_MSG,"Insufficient Account Balance");
+                                System.out.print("\n\tDo you want to try again (Y/n)?");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                screen = DASHBOARD;
+                                break loopWithdraw;
+                            }
+
+                        } while (repeat);
+
+                        accountBalance -= withdraw;
+
+                        System.out.printf("\n\tNew Balance: Rs. %,.2f\n",accountBalance);
+
+                        accounts[idIndex][2] = accountBalance+"";
+
+                        System.out.print("\n\tDo you want to continue Withdraw Money (Y/n)?");
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                        screen = DASHBOARD;
+                        break;
+
+                    } while (!valid);
 
             }
             
