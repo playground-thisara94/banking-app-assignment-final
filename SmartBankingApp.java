@@ -324,6 +324,36 @@ public class SmartBankingApp {
 
                     } while (!valid);
 
+                case ACCOUNT_BALANCE:
+                    
+                    do {
+                        valid = true;
+
+                        System.out.print("Enter Account No.: ");
+                        accountID = SCANNER.nextLine().strip();
+
+                        if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
+                            
+                            System.out.print("\n\tDo you want to try again (Y/n)?");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            screen = DASHBOARD;
+                            break;
+                        }
+
+                        int idIndex = findIndex(accountID, accounts);
+                        accountBalance = Double.valueOf(accounts[idIndex][2]);
+
+                        System.out.printf("\n\tAccount Name: %s\n",accounts[idIndex][1]);
+                        System.out.printf("\tCurrent Account Balance: Rs. %,.2f\n",accountBalance);
+                        System.out.printf("\tAvailable Account Balance: Rs. %,.2f\n",(accountBalance-500.00));
+
+                        System.out.print("\n\tDo you want to continue Check Account Balance (Y/n)?");
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                        screen = DASHBOARD;
+                        break;
+
+                    } while (!valid);
+
             }
             
         } while (true);
