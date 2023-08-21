@@ -40,7 +40,7 @@ public class SmartBankingApp {
                     System.out.println("\t[4]. Transfer Money");
                     System.out.println("\t[5]. Check Account Balance");
                     System.out.println("\t[6]. Drop Existing Account");
-                    System.out.println("\t[7]. Exit");   
+                    System.out.println("\t[7]. Exit");  
                     System.out.println();
                     System.out.print("\tEnter an option to continue: ");
                     int option = SCANNER.nextInt();
@@ -112,46 +112,53 @@ public class SmartBankingApp {
 
                     System.out.println();
                     System.out.printf(SUCCESS_MSG,String.format("SDB-%05d: %s has been created successfully.",id,name));
-                    System.out.print("\tDo you want to add another account (Y/n)?");
+                    System.out.print("\tDo you want to add another account (Y/n)? ");
                     if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
                     screen = DASHBOARD;
                     break;
                 
                 case DEPOSIT_MONEY:
                     String accountID;
-                    double accountBalance;
-                    double deposit;
+                    double accountBalance = 0;
+                    double deposit = 0;
+                    int idIndex = -1;
                     
                     loopDeposit:
                     do {
                         valid = true;
 
-                        System.out.print("Enter Account No.: ");
+                        System.out.print("\tEnter Account No. to Deposit: ");
                         accountID = SCANNER.nextLine().strip();
 
                         if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
                             
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            System.out.print("\n\tDo you want to try again (Y/n)? ");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                valid = false; 
+                                continue;
+                            }
                             screen = DASHBOARD;
-                            break;
+                            break loopDeposit;
                         }
 
-                        int idIndex = findIndex(accountID, accounts);
+                        idIndex = findIndex(accountID, accounts);
                         accountBalance = Double.valueOf(accounts[idIndex][2]);
                         System.out.printf("\n\tCurrent Balance: Rs. %,.2f\n",accountBalance);
 
                         boolean repeat;
                         do {
                             repeat = false;
-                            System.out.print("\nDeposit Amount: ");
+                            System.out.print("\n\tDeposit Amount: ");
                             deposit = SCANNER.nextDouble();
                             SCANNER.nextLine();
 
                             if(deposit < 500.00) {
                                 System.out.printf(ERROR_MSG,"Insufficient Amount");
-                                System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                System.out.print("\n\tDo you want to try again (Y/n)? ");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    valid = false;
+                                    continue loopDeposit;
+                                }
                                 screen = DASHBOARD;
                                 break loopDeposit;
                             }
@@ -164,48 +171,56 @@ public class SmartBankingApp {
 
                         accounts[idIndex][2] = accountBalance+"";
 
-                        System.out.print("\n\tDo you want to continue Deposit Money (Y/n)?");
-                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                        screen = DASHBOARD;
-                        break;
-
                     } while (!valid);
 
+                    System.out.print("\n\tDo you want to continue Deposit Money (Y/n)? ");
+                    if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                    screen = DASHBOARD;
+                    break;
+                    
                 case WITHDRAW_MONEY:
                     double withdraw;
+                    String withdrawID;
                     
                     loopWithdraw:
                     do {
                         valid = true;
 
-                        System.out.print("Enter Account No.: ");
-                        accountID = SCANNER.nextLine().strip();
+                        System.out.print("\tEnter Account No. to Withdraw: ");
+                        withdrawID = SCANNER.nextLine().strip();
 
-                        if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
+                        if(!notEmpty(withdrawID) || !validFormat(withdrawID) || !foundID(withdrawID, accounts)) {
                             
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            System.out.print("\n\tDo you want to try again (Y/n)? ");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                valid = false;
+                                continue loopWithdraw;
+                            }
                             screen = DASHBOARD;
                             break;
                         }
 
-                        int idIndex = findIndex(accountID, accounts);
+                        idIndex = findIndex(withdrawID, accounts);
                         accountBalance = Double.valueOf(accounts[idIndex][2]);
                         System.out.printf("\n\tCurrent Balance: Rs. %,.2f\n",accountBalance);
 
                         boolean repeat;
+                        loopWithdrawAmount:
                         do {
                             repeat = false;
-                            System.out.print("\nWithdraw Amount: ");
+                            System.out.print("\n\tWithdraw Amount: ");
                             withdraw = SCANNER.nextDouble();
                             SCANNER.nextLine();
 
                             if(withdraw < 100.00) {
                                 System.out.printf(ERROR_MSG,"Minimum Withdraw amount is Rs. 100.00");
-                                System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                System.out.print("\n\tDo you want to try again (Y/n)? ");
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    repeat = true;
+                                    continue;
+                                }
                                 screen = DASHBOARD;
-                                break loopWithdraw;
+                                break loopWithdrawAmount;
                             }
 
                             if((accountBalance - withdraw) < 500.00) {
@@ -213,23 +228,22 @@ public class SmartBankingApp {
                                 System.out.print("\n\tDo you want to try again (Y/n)?");
                                 if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
                                 screen = DASHBOARD;
-                                break loopWithdraw;
+                                break loopWithdrawAmount;
                             }
+                            accountBalance -= withdraw;
+
+                            System.out.printf("\n\tNew Balance: Rs. %,.2f\n",accountBalance);
+
+                            accounts[idIndex][2] = accountBalance+"";
 
                         } while (repeat);
 
-                        accountBalance -= withdraw;
-
-                        System.out.printf("\n\tNew Balance: Rs. %,.2f\n",accountBalance);
-
-                        accounts[idIndex][2] = accountBalance+"";
-
-                        System.out.print("\n\tDo you want to continue Withdraw Money (Y/n)?");
-                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                        screen = DASHBOARD;
-                        break;
-
                     } while (!valid);
+
+                    System.out.print("\n\tDo you want to continue Withdraw Money (Y/n)? ");
+                    if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                    screen = DASHBOARD;
+                    break;
 
                 case TRANSFER_MONEY:
                     double transfer;
@@ -245,13 +259,16 @@ public class SmartBankingApp {
                         boolean repeat;
                         do {
                             repeat = false;
-                            System.out.print("Enter From Account No.: ");
+                            System.out.print("\tEnter From Account No.: ");
                             fromAccount = SCANNER.nextLine().strip();
 
                             if(!notEmpty(fromAccount) || !validFormat(fromAccount) || !foundID(fromAccount, accounts)) {
                                 
                                 System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    repeat = true;
+                                    continue;
+                                }
                                 screen = DASHBOARD;
                                 break loopTransfer;
                             }
@@ -260,13 +277,16 @@ public class SmartBankingApp {
 
                         do {
                             repeat = false;
-                            System.out.print("Enter To Account No.: ");
+                            System.out.print("\tEnter To Account No.: ");
                             toAccount = SCANNER.nextLine().strip();
 
                             if(!notEmpty(toAccount) || !validFormat(toAccount) || !foundID(toAccount, accounts)) {
                                 
                                 System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    repeat = true;
+                                    continue;
+                                }
                                 screen = DASHBOARD;
                                 break loopTransfer;
                             }
@@ -286,14 +306,17 @@ public class SmartBankingApp {
 
                         do {
                             repeat = false;
-                            System.out.print("\nEnter Transfer Amount: ");
+                            System.out.print("\n\tEnter Transfer Amount: ");
                             transfer = SCANNER.nextDouble();
                             SCANNER.nextLine();
 
                             if(transfer < 100.00) {
                                 System.out.printf(ERROR_MSG,"Minimum Transfer amount is Rs. 100.00");
                                 System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    repeat = true;
+                                    continue;
+                                }
                                 screen = DASHBOARD;
                                 break loopTransfer;
                             }
@@ -301,7 +324,10 @@ public class SmartBankingApp {
                             if((toBalance - (transfer*1.02)) < 500.00) {
                                 System.out.printf(ERROR_MSG,"Insufficient Account Balance");
                                 System.out.print("\n\tDo you want to try again (Y/n)?");
-                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                                if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                    repeat = true;
+                                    continue;
+                                }
                                 screen = DASHBOARD;
                                 break loopTransfer;
                             }
@@ -317,30 +343,33 @@ public class SmartBankingApp {
                         accounts[fromIdIndex][2] = fromBalance+"";
                         accounts[toIdIndex][2] = toBalance+"";
 
-                        System.out.print("\n\tDo you want to continue Transfer Money (Y/n)?");
-                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                        screen = DASHBOARD;
-                        break;
-
                     } while (!valid);
+
+                    System.out.print("\n\tDo you want to continue Transfer Money (Y/n)?");
+                    if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                    screen = DASHBOARD;
+                    break;
 
                 case ACCOUNT_BALANCE:
                     
                     do {
                         valid = true;
 
-                        System.out.print("Enter Account No.: ");
+                        System.out.print("\tEnter Account No. to Check Balance: ");
                         accountID = SCANNER.nextLine().strip();
 
                         if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
                             
                             System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                valid = false;
+                                continue;
+                            }
                             screen = DASHBOARD;
                             break;
                         }
 
-                        int idIndex = findIndex(accountID, accounts);
+                        idIndex = findIndex(accountID, accounts);
                         accountBalance = Double.valueOf(accounts[idIndex][2]);
 
                         System.out.printf("\n\tAccount Name: %s\n",accounts[idIndex][1]);
@@ -348,29 +377,34 @@ public class SmartBankingApp {
                         System.out.printf("\tAvailable Account Balance: Rs. %,.2f\n",(accountBalance-500.00));
 
                         System.out.print("\n\tDo you want to continue Check Account Balance (Y/n)?");
-                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                        screen = DASHBOARD;
-                        break;
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                            valid = false;
+                            continue;
+                        }
 
                     } while (!valid);
-
-                 case DROP_ACCOUNT:
+                    screen = DASHBOARD;
+                    break;
+                
+                case DROP_ACCOUNT:
                     
                     do {
                         valid = true;
 
-                        System.out.print("Enter Account No.: ");
+                        System.out.print("\tEnter Account No. to Delete Account: ");
                         accountID = SCANNER.nextLine().strip();
 
                         if(!notEmpty(accountID) || !validFormat(accountID) || !foundID(accountID, accounts)) {
                             
-                            System.out.print("\n\tDo you want to try again (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            screen = DASHBOARD;
+                            System.out.print("\n\tDo you want to try again (Y/n)? ");
+                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                                valid = false;
+                                continue;
+                            }
                             break;
                         }
 
-                        int idIndex = findIndex(accountID, accounts);
+                        idIndex = findIndex(accountID, accounts);
                         accountBalance = Double.valueOf(accounts[idIndex][2]);
                         String accountName = accounts[idIndex][1];
                         System.out.printf("\n\tAccount Name: %s\n",accountName);
@@ -378,39 +412,33 @@ public class SmartBankingApp {
 
                         System.out.print("\n\tAre you sure to delete account (Y/n)?");
                         if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
-                            System.out.print("\n\tDo you want to delete another account (Y/n)?");
-                            if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                            else {
-                                screen = DASHBOARD;
-                                break;
-                            }
-                        }
 
-                        newAccount = new String[accounts.length-1][3]; 
+                            newAccount = new String[accounts.length-1][3]; 
                     
+                            for (int i = 0; i < idIndex; i++) {
+                                newAccount[i] = accounts[i];
+                            }
+                            for (int i = idIndex; i < newAccount.length; i++) {
+                                newAccount[i] = accounts[i+1];
+                            }
 
-                        for (int i = 0; i < idIndex; i++) {
-                            newAccount[i] = accounts[i];
+                            accounts = newAccount;
+
+                            System.out.println();
+                            System.out.printf(SUCCESS_MSG,String.format("%s: %s has been deleted successfully.",accountID,accountName));
                         }
-                        for (int i = idIndex; i < accounts.length; i++) {
-                            newAccount[i] = accounts[i+1];
-                        }
 
-                        accounts = newAccount;
-
-                        System.out.println();
-                        System.out.printf(SUCCESS_MSG,String.format("SDB-%05d: %s has been deleted successfully.",accountID,accountName));
                         System.out.print("\tDo you want to delete another account (Y/n)?");
-                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) continue;
-                        screen = DASHBOARD;
-                        break;
+                        if (SCANNER.nextLine().strip().toUpperCase().equals("Y")) {
+                            valid = false;
+                            continue;
+                        }
 
                     } while (!valid);
-
-            }
-            
+                    screen = DASHBOARD;
+                    break;
+                }
         } while (true);
-
     }
 
     private static int findIndex(String accountID, String[][] accounts) {
@@ -432,18 +460,14 @@ public class SmartBankingApp {
     }
 
     private static boolean validFormat(String accountId) {
+
+        if((accountId.length() != 9) || (!accountId.startsWith("SDB-"))) {
+            System.out.printf(ERROR_MSG,"Invalid Format");
+            return false;
+        }
         
-        for (int i = 0; i < accountId.length(); i++) {
-            String digits = accountId.substring(5, 10);
-            
-            if(accountId.length() != 9) {
-                System.out.printf(ERROR_MSG,"Invalid Format");
-                return false;
-            } else if(!accountId.substring(0, 4).equals("SDB-")) {
-                System.out.printf(ERROR_MSG,"Invalid Format");
-                return false;
-            }
-            else if (!Character.isDigit(digits.charAt(i))) {
+        for (int i = 4; i < accountId.length(); i++) {
+            if (!Character.isDigit(accountId.charAt(i))) {
                 System.out.printf(ERROR_MSG,"Invalid Format");
                 return false;
             }
@@ -459,6 +483,4 @@ public class SmartBankingApp {
         }
         return true;
     }
-
-    
 }
