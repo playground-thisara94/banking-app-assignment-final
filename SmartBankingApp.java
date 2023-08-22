@@ -23,6 +23,7 @@ public class SmartBankingApp {
         final String DROP_ACCOUNT = "Drop Existing Account";
 
         String[][] accounts = new String[0][];
+        int id = 0;
 
         String screen = DASHBOARD;
 
@@ -63,8 +64,7 @@ public class SmartBankingApp {
                     double initialDeposit;
                     boolean valid;
 
-                    int id = accounts.length+1;
-                    String newID = String.format("SDB-%05d",id);
+                    String newID = String.format("SDB-%05d",++id);
                     System.out.printf("\tID : %s\n",newID);
 
                     do{
